@@ -860,6 +860,41 @@ test! {
 }
 
 test! {
+    name: gprc_response_transfer_encoding_chunked,
+
+    server:
+        expected: "\
+            GET /v1/invoice/16c3d4559f33a65c44fd3419d4f48fb02c9386410118f5cf89669e2f726e1b63 HTTP/1.1\r\n\
+            host: {addr}\r\n\
+            \r\n\
+            ",
+        reply: "\
+            HTTP/1.1 500 Internal Server Error\r\n\
+            Content-Type: application/json\r\n\
+            Trailer: Grpc-Trailer-Content-Type\r\n\
+            Date: Wed, 01 Apr 2020 00:16:52 GMT\r\n\
+            Transfer-Encoding: chunked\r\n\
+            \r\n\
+            5e\r\n\
+            {\"error\":\"there are no existing invoices\",\"message\":\"there are no existing invoices\",\"code\":2}\r\n\
+            0\r\n\
+            Grpc-Trailer-Content-Type: application/grpc\r\n\
+            \r\n\
+            {\"error\":\"there are no existing invoices\",\"message\":\"there are no existing invoices\",\"code\":2}%\r\n\
+            ",
+
+    client:
+        request: {
+            method: GET,
+            url: "http://{addr}/v1/invoice/16c3d4559f33a65c44fd3419d4f48fb02c9386410118f5cf89669e2f726e1b63",
+        },
+        response:
+            status: INTERNAL_SERVER_ERROR,
+            headers: {},
+            body: None,
+}
+
+test! {
     name: client_set_host_false,
 
     server:
